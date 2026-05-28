@@ -1,0 +1,16 @@
+{
+  "name": "資産推移トラッカー",
+  "short_name": "資産推移",
+  "description": "総資産の推移を記録し、目標までの距離を可視化する個人用トラッカー",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F4ED",
+  "theme_color": "#14654F",
+  "icons": [
+    { "src": "./icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
