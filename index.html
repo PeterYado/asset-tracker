@@ -27,7 +27,7 @@
   html,body{margin:0;padding:0;}
   body{background:var(--paper); color:var(--ink); font-family:"IBM Plex Sans JP",system-ui,sans-serif; font-size:15px; line-height:1.6; padding-bottom:84px; max-width:520px; margin:0 auto;}
   .num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-feature-settings:"tnum";}
-  header{padding:22px 18px 10px; display:flex; align-items:baseline; justify-content:space-between;}
+  header{padding:calc(22px + env(safe-area-inset-top)) 18px 10px; display:flex; align-items:center; justify-content:space-between; min-height:calc(40px + env(safe-area-inset-top)); box-sizing:border-box;}
   header h1{font-size:17px; font-weight:600; margin:0; letter-spacing:.02em;}
   header .upd{font-size:12px; color:var(--ink3);}
   main{padding:6px 14px 20px;}
@@ -116,7 +116,7 @@
 </div>
 <header>
   <h1>資産推移トラッカー</h1>
-  <span style="display:flex;align-items:baseline;">
+  <span style="display:flex;align-items:center;">
     <span class="upd num" id="hdrupd"></span>
     <span class="syncb" id="syncb"><span class="dot"></span><span id="synct"></span></span>
   </span>
