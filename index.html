@@ -28,13 +28,13 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
-  html{height:100%;}
-  body{background:var(--paper); color:var(--ink); font-family:"IBM Plex Sans JP",system-ui,sans-serif; font-size:15px; line-height:1.6; max-width:520px; margin:0 auto; position:fixed; top:0; right:0; bottom:0; left:0; display:flex; flex-direction:column; overflow:hidden;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:"IBM Plex Sans JP",system-ui,sans-serif; font-size:15px; line-height:1.6; max-width:520px; margin:0 auto; min-height:100vh; padding-bottom:calc(72px + env(safe-area-inset-bottom));}
   .num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-feature-settings:"tnum";}
-  header{padding:calc(22px + env(safe-area-inset-top)) 18px 10px; display:flex; align-items:center; justify-content:space-between; min-height:calc(40px + env(safe-area-inset-top)); box-sizing:border-box; flex-shrink:0;}
+  header{padding:calc(22px + env(safe-area-inset-top)) 18px 10px; display:flex; align-items:center; justify-content:space-between; min-height:calc(40px + env(safe-area-inset-top)); box-sizing:border-box; position:sticky; top:0; z-index:10; background:var(--paper);}
   header h1{font-size:17px; font-weight:600; margin:0; letter-spacing:.02em;}
   header .upd{font-size:12px; color:var(--ink3);}
-  main{padding:6px 14px 20px; flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; min-height:0;}
+  main{padding:6px 14px 20px;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:12px;}
   .lbl{font-size:12px; color:var(--ink2); letter-spacing:.03em; margin:0 0 4px;}
   .big{font-size:30px; font-weight:600; letter-spacing:-.01em; margin:0;}
@@ -76,7 +76,7 @@
   .seg-toggle button{height:30px; padding:0 14px; border:0; background:#fff; color:var(--ink2); cursor:pointer; font-size:13px; border-right:1px solid var(--line2);}
   .seg-toggle button:last-child{border-right:0;}
   .seg-toggle button.on{background:var(--ever); color:#fff;}
-  nav{flex-shrink:0; background:var(--card); border-top:1px solid var(--line2); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+  nav{position:fixed; left:0; right:0; bottom:0; z-index:40; max-width:520px; margin:0 auto; background:var(--card); border-top:1px solid var(--line2); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
   nav button{flex:1; background:none; border:0; padding:7px 2px; color:var(--ink3); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px;}
   nav button .gl{font-size:19px; line-height:1;}
   nav button.on{color:var(--ever);}
@@ -304,7 +304,7 @@ function vDash(){
   html+='</div>';
   return html;
 }
-function setMode(m){ CHARTMODE=m; var v=document.getElementById('view'); v.innerHTML=vDash(); setTimeout(drawChart,20); v.scrollTop=0; }
+function setMode(m){ CHARTMODE=m; var v=document.getElementById('view'); v.innerHTML=vDash(); setTimeout(drawChart,20); window.scrollTo(0,0); }
 
 function chartSeries(mode){
   var pts=[];
@@ -581,7 +581,7 @@ function go(tab){ TAB=tab;
   var v=document.getElementById('view');
   if(tab==='dash'){ v.innerHTML=vDash(); setTimeout(drawChart,30); }
   else { document.getElementById('hdrupd').textContent=''; v.innerHTML = tab==='hist'?vHist() : tab==='sec'?vSec() : vData(); }
-  v.scrollTop=0;
+  window.scrollTo(0,0);
 }
 document.querySelectorAll('#nav button').forEach(function(b){ b.addEventListener('click',function(){go(b.dataset.tab);}); });
 document.getElementById('fab').addEventListener('click',openNewSnap);
