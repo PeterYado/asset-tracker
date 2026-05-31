@@ -92,8 +92,12 @@
   .rmx{background:none; border:0; color:var(--ink3); font-size:18px; cursor:pointer; line-height:1; padding:0 2px;}
   .bl-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.4fr) auto; gap:7px; align-items:center; margin-bottom:8px;}
   .bl-row input{height:36px; padding:0 8px; font-size:13px; min-width:0; width:100%; box-sizing:border-box;}
+  /* 方法A (ミーグリ管理 DEVELOPMENT_LOG 4-1): iOS Safari は date input を text 扱いして幅計算が崩れるので、
+     native input を opacity:0 で重ね、自前の表示レイヤー .datedisp を上に描く */
   .datewrap{position:relative; width:100%; height:36px;}
-  .datewrap input[type="date"]{position:absolute; inset:0; width:100%; height:100%; min-width:0; padding:0 8px; font-size:13px; box-sizing:border-box;}
+  .datewrap input[type="date"]{position:absolute; inset:0; width:100%; height:100%; min-width:0; padding:0; margin:0; border:0; background:transparent; opacity:0; -webkit-appearance:none; appearance:none; font-size:16px; box-sizing:border-box; z-index:2; cursor:pointer;}
+  .datedisp{position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; padding:0 8px; border:1px solid var(--line2); border-radius:9px; background:#fff; font-size:13px; color:var(--ink); pointer-events:none; box-sizing:border-box;}
+  .datedisp .ic{color:var(--ink3); font-size:12px;}
   /* --- auth / sync (Step2) --- */
   .syncb{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); margin-left:8px;}
   .syncb .dot{width:7px; height:7px; border-radius:50%; background:var(--ink3); display:inline-block;}
@@ -256,6 +260,9 @@ function snapTotal(sn){ var t=0; for(var k in sn.h){ t+=Number(sn.h[k].p)||0; } 
 function snapsSorted(){ return state.snapshots.slice().sort(function(a,b){return a.date<b.date?-1:1;}); }
 function priorSnap(date, excludeId){ var c=null; snapsSorted().forEach(function(s){ if(s.id===excludeId)return; if(s.date<date) c=s; }); return c; }
 function dispDate(d){ return d.replace(/-/g,'/'); }
+/* 方法A: タップで native picker を開く / 選択後に表示レイヤーを更新 */
+function openDatePicker(wrap){ var inp=wrap.querySelector('input[type="date"]'); if(inp&&typeof inp.showPicker==='function'){ try{inp.showPicker();}catch(e){inp.focus();} } else if(inp){ inp.focus(); } }
+function syncDateDisp(inp){ var w=inp.parentNode; var d=w&&w.querySelector('.datedisp span:first-child'); if(d) d.textContent=dispDate(inp.value); }
 
 /* ===== dashboard ===== */
 var CHARTMODE='month', chartInst=null;
@@ -393,7 +400,7 @@ function vData(){
   state.baselines.forEach(function(b,i){
     html+='<div class="bl-row">'
       +'<input value="'+(b.label||'')+'" onchange="blEdit('+i+',\'label\',this.value)">'
-      +'<div class="datewrap"><input type="date" value="'+b.date+'" onchange="blEdit('+i+',\'date\',this.value)"></div>'
+      +'<div class="datewrap" onclick="openDatePicker(this)"><input type="date" id="bldate'+i+'" value="'+b.date+'" onchange="blEdit('+i+',\'date\',this.value);syncDateDisp(this)"><div class="datedisp"><span>'+dispDate(b.date)+'</span><span class="ic">📅</span></div></div>'
       +'<input class="num" value="'+b.total+'" onchange="blEdit('+i+',\'total\',this.value)">'
       +'<button class="rmx" onclick="blDel('+i+')">×</button></div>';
   });
@@ -490,7 +497,7 @@ function renderForm(){
   var m='<div class="modal-bg"><div class="sheet" onclick="event.stopPropagation()">'
     +'<button class="x" onclick="closeModal()">×</button><h2>'+(FORM.editId?'確認を編集':'新しい確認を追加')+'</h2>'
     +'<p class="note" style="margin-top:0;margin-bottom:12px;">'+(FORM.editId?'':'直前の確認から繰り越しました。変わったところだけ直してください。日付を過去にすると、その直前の確認から繰り越します。')+'</p>'
-    +'<div class="field"><label class="fl">日付</label><input type="date" id="snDate" value="'+FORM.date+'" onchange="onDate(this.value)"></div>'
+    +'<div class="field"><label class="fl">日付</label><div class="datewrap" onclick="openDatePicker(this)"><input type="date" id="snDate" value="'+FORM.date+'" onchange="onDate(this.value);syncDateDisp(this)"><div class="datedisp"><span>'+dispDate(FORM.date)+'</span><span class="ic">📅</span></div></div></div>'
     +'<div class="field"><label class="fl">メモ（任意）</label><input id="snMemo" value="'+FORM.memo+'" oninput="FORM.memo=this.value"></div>'
     +cards + addsel
     +'<div class="formbar">'
