@@ -85,7 +85,10 @@
   .hidden{display:none;}
   .modal-bg{position:fixed; inset:0; background:rgba(30,28,24,.42); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
   .sheet{background:var(--paper); width:100%; max-width:520px; max-height:92vh; overflow:auto; border-radius:18px 18px 0 0; padding:18px 16px calc(16px + env(safe-area-inset-bottom));}
-  .formbar{position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--line2); margin:14px -16px 0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
+  /* 入力フォームのシートだけ: スクロール領域と固定フッターを分離（formbarが浮かないように） */
+  .sheet:has(.sheet-scroll){display:flex; flex-direction:column; overflow:hidden; padding:0;}
+  .sheet-scroll{overflow-y:auto; overflow-x:hidden; flex:1 1 auto; padding:18px 16px 0; min-height:0;}
+  .formbar{flex:0 0 auto; background:var(--paper); border-top:1px solid var(--line2); padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
   .sheet h2{font-size:16px; font-weight:600; margin:2px 0 14px;}
   .sheet .x{float:right; background:none; border:0; font-size:22px; color:var(--ink3); cursor:pointer; line-height:1;}
   .deltarow{font-size:12px; color:var(--ink3); margin-top:2px;}
@@ -493,11 +496,13 @@ function renderForm(){
     +avail.map(function(s){return '<option value="'+s.id+'">'+s.種目+' / '+s.銘柄+'</option>';}).join('')
     +'</select><button class="tiny" style="height:40px;" onclick="addRow()">追加</button></div></div>'; }
   var m='<div class="modal-bg"><div class="sheet" onclick="event.stopPropagation()">'
+    +'<div class="sheet-scroll">'
     +'<button class="x" onclick="closeModal()">×</button><h2>'+(FORM.editId?'確認を編集':'新しい確認を追加')+'</h2>'
     +'<p class="note" style="margin-top:0;margin-bottom:12px;">'+(FORM.editId?'':'直前の確認から繰り越しました。変わったところだけ直してください。日付を過去にすると、その直前の確認から繰り越します。')+'</p>'
     +'<div class="field"><label class="fl">日付</label><input type="date" id="snDate" value="'+FORM.date+'" onchange="onDate(this.value)"></div>'
     +'<div class="field"><label class="fl">メモ（任意）</label><input id="snMemo" value="'+FORM.memo+'" oninput="FORM.memo=this.value"></div>'
     +cards + addsel
+    +'</div>'
     +'<div class="formbar">'
     +  '<div class="row" style="border:0;padding:0 0 9px;"><span class="k">入力中の総資産</span><span class="v num" id="liveTotal" style="font-weight:600;font-size:18px;">—</span></div>'
     +  '<div style="display:flex;gap:10px;">'
