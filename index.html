@@ -83,25 +83,17 @@
   .fab{position:fixed; bottom:calc(74px + env(safe-area-inset-bottom)); right:max(16px, calc(50% - 260px + 16px)); width:54px; height:54px; border-radius:50%; background:var(--ever); color:#fff; border:0; font-size:26px; line-height:1; cursor:pointer; box-shadow:0 4px 14px rgba(20,101,79,.34); z-index:5;}
   .note{font-size:11.5px; color:var(--ink3); line-height:1.6; margin:8px 2px 0;}
   .hidden{display:none;}
-  .modal-bg{position:fixed; inset:0; background:rgba(30,28,24,.42); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
+  .modal-bg{position:fixed; inset:0; background:rgba(30,28,24,.42); z-index:20; display:flex; align-items:flex-end; justify-content:center;}
   .sheet{background:var(--paper); width:100%; max-width:520px; max-height:92vh; overflow:auto; border-radius:18px 18px 0 0; padding:18px 16px calc(16px + env(safe-area-inset-bottom));}
-  /* 入力フォームのシートだけ: スクロール領域と固定フッターを分離（formbarが浮かないように） */
-  .sheet:has(.sheet-scroll){display:flex; flex-direction:column; overflow:hidden; padding:0;}
-  .sheet-scroll{overflow-y:auto; overflow-x:hidden; flex:1 1 auto; padding:18px 16px 0; min-height:0;}
-  .formbar{flex:0 0 auto; background:var(--paper); border-top:1px solid var(--line2); padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
+  .formbar{position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--line2); margin:14px -16px 0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
   .sheet h2{font-size:16px; font-weight:600; margin:2px 0 14px;}
   .sheet .x{float:right; background:none; border:0; font-size:22px; color:var(--ink3); cursor:pointer; line-height:1;}
   .deltarow{font-size:12px; color:var(--ink3); margin-top:2px;}
   .rmx{background:none; border:0; color:var(--ink3); font-size:18px; cursor:pointer; line-height:1; padding:0 2px;}
   .bl-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.4fr) auto; gap:7px; align-items:center; margin-bottom:8px;}
   .bl-row input{height:36px; padding:0 8px; font-size:13px; min-width:0; width:100%; box-sizing:border-box;}
-  /* 보이는 枠(테두리·배경·라운드)는 부모가 담당 → 항상 셀 폭에 100% 고정. iOS의 date 위젯이 폭을 넘쳐도 overflow:hidden으로 클립되어 옆 칸을 침범하지 않음 */
-  .datewrap{position:relative; width:100%; height:36px; overflow:hidden; border:1px solid var(--line2); border-radius:9px; background:#fff; box-sizing:border-box;}
-  .datewrap:focus-within{border-color:var(--ever); box-shadow:0 0 0 3px var(--everbg);}
-  /* input 본체는 투명·테두리 없음 → 네이티브 위젯이 width:100%를 무시하고 넘쳐도 시각적으로 드러나지 않음 */
-  .datewrap input[type="date"]{position:absolute; inset:0; width:100%; height:100%; min-width:0; max-width:100%; padding:0 8px; font-size:13px; box-sizing:border-box; border:0; background:transparent; -webkit-appearance:none; appearance:none;}
-  .datewrap input[type="date"]:focus{box-shadow:none;}
-  .datewrap input[type="date"]::-webkit-date-and-time-value{text-align:left;}
+  .datewrap{position:relative; width:100%; height:36px;}
+  .datewrap input[type="date"]{position:absolute; inset:0; width:100%; height:100%; min-width:0; padding:0 8px; font-size:13px; box-sizing:border-box;}
   /* --- auth / sync (Step2) --- */
   .syncb{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); margin-left:8px;}
   .syncb .dot{width:7px; height:7px; border-radius:50%; background:var(--ink3); display:inline-block;}
@@ -193,8 +185,16 @@ function S(){ return {
 var state = S();
 
 /* ===== Step2: Supabase 同期 ===== */
-var SB_URL="https://knqfipommlddbqranpgm.supabase.co";
-var SB_KEY="sb_publishable_jo_GSfe4Nn5f1qVdXapaFQ_TMa2XQ0v";
+/* ▼▼▼ ここを oshikatsu-kakeibo プロジェクトの値に貼り替える ▼▼▼
+   Supabase ダッシュボード → 対象プロジェクト → Project Settings → Data API（旧 API）
+     ・Project URL          → SB_URL に貼る
+     ・publishable/anon key  → SB_KEY に貼る（"anon public" もしくは sb_publishable_... で始まるキー）
+   ※ 旧プロジェクト(asset-viewer)の値：
+       URL = https://knqfipommlddbqranpgm.supabase.co
+     は使わない。必ず新プロジェクトの値に置き換えること。 */
+var SB_URL="https://uoqhcxhwnjmddtfjkpbt.supabase.co";
+var SB_KEY="sb_publishable_ePJplPhM1ln-49AP3DMLlg_B82-JzXr";
+/* ▲▲▲ 貼り替えここまで ▲▲▲ */
 var sb=null, SESSION=null, AUTHMODE='signin', saveTimer=null;
 try{ if(window.supabase) sb=window.supabase.createClient(SB_URL, SB_KEY); }catch(e){}
 
@@ -208,12 +208,12 @@ function persist(){
   setSync('save');
   if(saveTimer) clearTimeout(saveTimer);
   saveTimer=setTimeout(function(){
-    sb.from('app_state').upsert({user_id:SESSION.user.id, data:state, updated_at:new Date().toISOString()})
+    sb.from('asset_app_state').upsert({user_id:SESSION.user.id, data:state, updated_at:new Date().toISOString()})
       .then(function(r){ setSync(r.error?'err':'ok'); if(r.error) console.error(r.error); });
   },600);
 }
 function loadState(){
-  return sb.from('app_state').select('data').eq('user_id',SESSION.user.id).maybeSingle()
+  return sb.from('asset_app_state').select('data').eq('user_id',SESSION.user.id).maybeSingle()
     .then(function(r){
       if(r.data && r.data.data && r.data.data.securities){ state=r.data.data; setSync('ok'); }
       else { /* 初回：いま手元にあるデータ（PETERの実データ）をそのままクラウドへ */ persist(); }
@@ -496,13 +496,11 @@ function renderForm(){
     +avail.map(function(s){return '<option value="'+s.id+'">'+s.種目+' / '+s.銘柄+'</option>';}).join('')
     +'</select><button class="tiny" style="height:40px;" onclick="addRow()">追加</button></div></div>'; }
   var m='<div class="modal-bg"><div class="sheet" onclick="event.stopPropagation()">'
-    +'<div class="sheet-scroll">'
     +'<button class="x" onclick="closeModal()">×</button><h2>'+(FORM.editId?'確認を編集':'新しい確認を追加')+'</h2>'
     +'<p class="note" style="margin-top:0;margin-bottom:12px;">'+(FORM.editId?'':'直前の確認から繰り越しました。変わったところだけ直してください。日付を過去にすると、その直前の確認から繰り越します。')+'</p>'
     +'<div class="field"><label class="fl">日付</label><input type="date" id="snDate" value="'+FORM.date+'" onchange="onDate(this.value)"></div>'
     +'<div class="field"><label class="fl">メモ（任意）</label><input id="snMemo" value="'+FORM.memo+'" oninput="FORM.memo=this.value"></div>'
     +cards + addsel
-    +'</div>'
     +'<div class="formbar">'
     +  '<div class="row" style="border:0;padding:0 0 9px;"><span class="k">入力中の総資産</span><span class="v num" id="liveTotal" style="font-weight:600;font-size:18px;">—</span></div>'
     +  '<div style="display:flex;gap:10px;">'
